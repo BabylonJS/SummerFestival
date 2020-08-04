@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "noResolve": false,
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "preserveConstEnums":true,
+    "lib": [
+        "dom",
+        "es6"
+    ],
+    // "outDir": "./dist"
+    "rootDir": "src"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "name": "hanabi",
+  "version": "1.0.0",
+  "description": "3D babylon game",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack-dev-server --port 8080",
+    "start:dev": "webpack-dev-server --watch --mode=development --inline --port 8080"
+  },
+  "author": "capucat",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@babylonjs/core": "^4.1.0",
+    "@babylonjs/gui": "^4.1.0",
+    "@babylonjs/inspector": "^4.1.0",
+    "@babylonjs/loaders": "^4.1.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "html-loader": "^1.1.0",
+    "html-webpack-plugin": "^4.3.0",
+    "ts-loader": "^7.0.5",
+    "typescript": "^3.9.5",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.11.0"
+  }
+}
