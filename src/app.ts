@@ -743,6 +743,7 @@ class App {
         stackPanel.addControl(gameCred);
         stackPanel.addControl(pauseCred);
         stackPanel.addControl(endCred);
+        stackPanel.addControl(loseCred);
         stackPanel.addControl(fireworksSfx);
         stackPanel.addControl(dashCred);
         stackPanel.addControl(sfxCred);
@@ -837,7 +838,7 @@ class App {
             if (this._transition) {
                 fadeLevel -= .05;
                 if(fadeLevel <= 0){
-                    // this._goToCutScene();
+                    
                     this._goToStart();
                     this._transition = false;
                 }
@@ -849,7 +850,7 @@ class App {
             //todo: add fade transition & selection sfx
             scene.detachControl();
             guiMenu.dispose();
-            // this._goToStart();
+            
             this._transition = true;
             sfx.play();
             

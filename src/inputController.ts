@@ -15,7 +15,6 @@ export class PlayerInput {
 
     //jumping and dashing
     public jumpKeyDown: boolean = false;
-    public dashDxn: number = 0;
     public dashing: boolean = false;
 
     //Mobile Input trackers
@@ -37,20 +36,10 @@ export class PlayerInput {
 
         this.inputMap = {};
         this._scene.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, (evt) => {
-            //only detect inputs if game isn't paused
-            // if (!this._ui.gamePaused) {
-                this.inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-            // } else {
-                // this.inputMap[evt.sourceEvent.key] = false;
-            // }
+            this.inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
         }));
         this._scene.actionManager.registerAction(new ExecuteCodeAction(ActionManager.OnKeyUpTrigger, (evt) => {
-            //only detect inputs if game isn't paused
-            // if (!this._ui.gamePaused) {
-                this.inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-            // } else {
-                // this.inputMap[evt.sourceEvent.key] = false;
-            // }
+            this.inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
         }));
 
         //add to the scene an observable that calls updateFromKeyboard before rendering
