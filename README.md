@@ -28,7 +28,8 @@ Left/Right/Up/Down Arrows: movement
 - [sprites](https://github.com/capucat/hanabi/tree/master/public/sprites)
 - [texture](https://github.com/capucat/hanabi/blob/master/public/textures/litLantern.png)
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.  
+Art by Bianca Guerrero (capucat)
 
 ## Music
 ["copycat"](https://opengameart.org/content/copycat) by syncopika is licensed under [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/)  
