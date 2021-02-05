@@ -2,7 +2,7 @@ import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
 
-import { Engine, Scene, Vector3, Mesh, Color3, Color4, ShadowGenerator, GlowLayer, PointLight, FreeCamera, CubeTexture, Sound, PostProcess, Effect, SceneLoader, Matrix, MeshBuilder, Quaternion, AssetsManager } from "@babylonjs/core";
+import { Engine, Scene, Vector3, Mesh, Color3, Color4, ShadowGenerator, GlowLayer, PointLight, FreeCamera, CubeTexture, Sound, PostProcess, Effect, SceneLoader, Matrix, MeshBuilder, Quaternion, AssetsManager, EngineFactory } from "@babylonjs/core";
 import { PlayerInput } from "./inputController";
 import { Player } from "./characterController";
 import { Hud } from "./ui";
@@ -43,7 +43,11 @@ class App {
         this._canvas = this._createCanvas();
 
         // initialize babylon scene and engine
-        this._engine = new Engine(this._canvas, true);
+        this._init();
+    }
+
+    private async _init(): Promise<void> {
+        this._engine = (await EngineFactory.CreateAsync(this._canvas, undefined)) as Engine;
         this._scene = new Scene(this._engine);
 
         //**for development: make inspector visible/invisible
@@ -59,7 +63,7 @@ class App {
         });
 
         //MAIN render loop & state machine
-        this._main();
+        await this._main();
     }
 
     private async _main(): Promise<void> {
