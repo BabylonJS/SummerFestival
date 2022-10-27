@@ -3,7 +3,7 @@ Source code for game tutorial written by capucat
 
 Includes: game files, assets, tutorial related files
 
-[Documentation](https://doc.babylonjs.com/how_to/page1)
+[Documentation](https://doc.babylonjs.com/guidedLearning/createAGame)
 
 [Game](https://capucat.github.io/summers-festival/)
 
