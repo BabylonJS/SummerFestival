@@ -5,7 +5,7 @@ Includes: game files, assets, tutorial related files
 
 [Documentation](https://doc.babylonjs.com/guidedLearning/createAGame)
 
-[Game](https://capucat.github.io/summers-festival/)
+[Game](https://babylonjs.github.io/SummerFestival/)
 
 # How To's:
 Install dependencies via:
