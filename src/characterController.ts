@@ -144,7 +144,6 @@ export class Player extends TransformNode {
                 this._walkingSfx.play();
             } else if (!play && this._walkingSfx.isPlaying) {
                 this._walkingSfx.stop();
-                this._walkingSfx.isPlaying = false; // make sure that walkingsfx.stop is called only once
             }
         })
 
@@ -258,7 +257,7 @@ export class Player extends TransformNode {
         } else if (!this._isFalling && this._grounded) {
             this._currentAnim = this._idle;
             //only notify observer if it's playing
-            if(this.scene.getSoundByName("walking").isPlaying){
+            if(this.scene.getSoundByName("walking")?.isPlaying){
                 this.onRun.notifyObservers(false);
             }
         } else if (this._isFalling) {
