@@ -2,7 +2,7 @@ import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 import "@babylonjs/loaders/glTF";
 
-import { Engine, Scene, Vector3, Mesh, Color3, Color4, ShadowGenerator, GlowLayer, PointLight, FreeCamera, CubeTexture, Sound, PostProcess, Effect, SceneLoader, Matrix, MeshBuilder, Quaternion, AssetsManager, EngineFactory } from "@babylonjs/core";
+import { Engine, Scene, Vector3, Mesh, Color3, Color4, ShadowGenerator, GlowLayer, PointLight, FreeCamera, CubeTexture, PostProcess, Effect, SceneLoader, Matrix, MeshBuilder, Quaternion, AssetsManager, EngineFactory, CreateAudioEngineAsync, CreateSoundAsync, CreateStreamingSoundAsync, AbstractSound, AudioEngineV2, SoundState } from "@babylonjs/core";
 import { PlayerInput } from "./inputController";
 import { Player } from "./characterController";
 import { Hud } from "./ui";
@@ -18,6 +18,8 @@ class App {
     private _scene: Scene;
     private _canvas: HTMLCanvasElement;
     private _engine: Engine;
+    private _audioEngine: AudioEngineV2;
+    private _activeSceneSounds: AbstractSound[] = [];
 
     //Game State Related
     public assets;
@@ -27,9 +29,8 @@ class App {
     private _environment;
 
     //Sounds
-    // public sfx: Sound;
-    public game: Sound;
-    public end: Sound;
+    public game: AbstractSound;
+    public end: AbstractSound;
 
     //Scene - related
     private _state: number = 0;
@@ -48,6 +49,7 @@ class App {
 
     private async _init(): Promise<void> {
         this._engine = (await EngineFactory.CreateAsync(this._canvas, undefined)) as Engine;
+        this._audioEngine = await CreateAudioEngineAsync();
         this._scene = new Scene(this._engine);
 
         //**for development: make inspector visible/invisible
@@ -129,8 +131,21 @@ class App {
         return this._canvas;
     }
     
+    private _disposeActiveSceneSounds(): void {
+        for (const sound of this._activeSceneSounds) {
+            sound.dispose();
+        }
+        this._activeSceneSounds = [];
+    }
+
     // goToStart
     private async _goToStart() {
+        this._disposeActiveSceneSounds();
+        this.game?.dispose();
+        this.end?.dispose();
+        this.game = null;
+        this.end = null;
+
         this._engine.displayLoadingUI(); //make sure to wait for start to load
 
         //--SCENE SETUP--
@@ -143,14 +158,9 @@ class App {
         camera.setTarget(Vector3.Zero()); //targets the camera to scene origin
 
         //--SOUNDS--
-        const start = new Sound("startSong", "./sounds/copycat(revised).mp3", scene, function () {
-        }, {
-            volume: 0.25,
-            loop: true,
-            autoplay: true
-        });
-        const sfx = new Sound("selection", "./sounds/vgmenuselect.wav", scene, function () {
-        });
+        const start = await CreateStreamingSoundAsync("startSong", "./sounds/copycat(revised).mp3", { volume: 0.25, loop: true, autoplay: true });
+        const sfx = await CreateSoundAsync("selection", "./sounds/vgmenuselect.wav");
+        this._activeSceneSounds.push(start, sfx);
 
         //--GUI--
         const guiMenu = AdvancedDynamicTexture.CreateFullscreenUI("UI");
@@ -294,6 +304,7 @@ class App {
     }
 
     private async _goToCutScene(): Promise<void> {
+        this._disposeActiveSceneSounds();
         this._engine.displayLoadingUI();
         //--SETUP SCENE--
         //dont detect any inputs from this ui while the game is loading
@@ -578,7 +589,7 @@ class App {
         this._gamescene = scene;
 
         //--SOUNDS--
-        this._loadSounds(scene);
+        await this._loadSounds();
 
         //--CREATE ENVIRONMENT--
         const environment = new Environment(scene);
@@ -589,18 +600,9 @@ class App {
     }
 
     //loading sounds for the game scene
-    private _loadSounds(scene: Scene): void {
-
-        this.game = new Sound("gameSong", "./sounds/Christmassynths.wav", scene, function () {
-        }, {
-            loop:true,
-            volume: 0.1
-        });
-
-        this.end = new Sound("endSong", "./sounds/copycat(revised).mp3", scene, function () {
-        }, {
-            volume: 0.25
-        });
+    private async _loadSounds(): Promise<void> {
+        this.game = await CreateStreamingSoundAsync("gameSong", "./sounds/Christmassynths.wav", { loop: true, volume: 0.1 });
+        this.end = await CreateStreamingSoundAsync("endSong", "./sounds/copycat(revised).mp3", { volume: 0.25 });
     }
 
     //goToGame
@@ -611,7 +613,7 @@ class App {
         let scene = this._gamescene;
 
         //--GUI--
-        const ui = new Hud(scene);
+        const ui = new Hud(scene, this.game);
         this._ui = ui;
         //dont detect any inputs from this ui while the game is loading
         scene.detachControl();
@@ -780,14 +782,11 @@ class App {
         camera.setTarget(Vector3.Zero());
 
         //--SOUNDS--
-        const start = new Sound("loseSong", "./sounds/Eye of the Storm.mp3", scene, function () {
-        }, {
-            volume: 0.25,
-            loop: true,
-            autoplay: true
-        });
-        const sfx = new Sound("selection", "./sounds/vgmenuselect.wav", scene, function () {
-        });
+        this.game?.dispose();
+        this.game = null;
+        const start = await CreateStreamingSoundAsync("loseSong", "./sounds/Eye of the Storm.mp3", { volume: 0.25, loop: true, autoplay: true });
+        const sfx = await CreateSoundAsync("selection", "./sounds/vgmenuselect.wav");
+        this._activeSceneSounds.push(start, sfx);
 
         //--GUI--
         const guiMenu = AdvancedDynamicTexture.CreateFullscreenUI("UI");

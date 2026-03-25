@@ -1,5 +1,5 @@
 import { TextBlock, StackPanel, AdvancedDynamicTexture, Image, Button, Rectangle, Control, Grid } from "@babylonjs/gui";
-import { Scene, Sound, ParticleSystem, PostProcess, Effect, SceneSerializer } from "@babylonjs/core";
+import { Scene, ParticleSystem, PostProcess, Effect, SceneSerializer } from "@babylonjs/core";
 
 export class Hud {
     private _scene: Scene;

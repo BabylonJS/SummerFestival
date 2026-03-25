@@ -1,4 +1,4 @@
-import { Scene, Mesh, Vector3, Color3, TransformNode, SceneLoader, ParticleSystem, Color4, Texture, PBRMetallicRoughnessMaterial, VertexBuffer, AnimationGroup, Sound, ExecuteCodeAction, ActionManager, Tags } from "@babylonjs/core";
+import { Scene, Mesh, Vector3, Color3, TransformNode, SceneLoader, ParticleSystem, Color4, Texture, PBRMetallicRoughnessMaterial, VertexBuffer, AnimationGroup, CreateSoundAsync, AbstractSound, ExecuteCodeAction, ActionManager, Tags } from "@babylonjs/core";
 import { Lantern } from "./lantern";
 import { Player } from "./characterController";
 
@@ -179,8 +179,8 @@ class Firework {
     private _started: boolean;
 
     //sounds
-    private _explosionSfx: Sound;
-    private _rocketSfx: Sound;
+    private _explosionSfx: AbstractSound;
+    private _rocketSfx: AbstractSound;
 
     constructor(scene: Scene, i: number) {
         this._scene = scene;
@@ -308,15 +308,8 @@ class Firework {
         }
     }
 
-    private _loadSounds(): void {
-        this._rocketSfx = new Sound("selection", "./sounds/fw_05.wav", this._scene, function () {
-        }, {
-            volume: 0.5,
-        });
-
-        this._explosionSfx = new Sound("selection", "./sounds/fw_03.wav", this._scene, function () {
-        }, {
-            volume: 0.5,
-        });
+    private async _loadSounds(): Promise<void> {
+        this._rocketSfx = await CreateSoundAsync("rocketSfx", "./sounds/fw_05.wav", { volume: 0.5 });
+        this._explosionSfx = await CreateSoundAsync("explosionSfx", "./sounds/fw_03.wav", { volume: 0.5 });
     }
 }

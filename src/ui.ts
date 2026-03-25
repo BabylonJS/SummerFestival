@@ -1,5 +1,5 @@
 import { TextBlock, StackPanel, AdvancedDynamicTexture, Image, Button, Rectangle, Control, Grid } from "@babylonjs/gui";
-import { Scene, Sound, ParticleSystem, PostProcess, Effect, SceneSerializer } from "@babylonjs/core";
+import { Scene, ParticleSystem, PostProcess, Effect, SceneSerializer, CreateSoundAsync, AbstractSound, SoundState } from "@babylonjs/core";
 
 export class Hud {
     private _scene: Scene;
@@ -49,14 +49,16 @@ export class Hud {
     public downBtn: Button;
 
     //Sounds
-    public quitSfx: Sound;
-    private _sfx: Sound;
-    private _pause: Sound;
-    private _sparkWarningSfx: Sound;
+    public quitSfx: AbstractSound;
+    private _sfx: AbstractSound;
+    private _pause: AbstractSound;
+    private _sparkWarningSfx: AbstractSound;
+    private _gameSong: AbstractSound;
 
-    constructor(scene: Scene) {
+    constructor(scene: Scene, gameSong?: AbstractSound) {
 
         this._scene = scene;
+        this._gameSong = gameSong ?? null;
 
         const playerUI = AdvancedDynamicTexture.CreateFullscreenUI("UI");
         this._playerUI = playerUI;
@@ -151,7 +153,7 @@ export class Hud {
             this._prevTime = this.time;
 
             //--SOUNDS--
-            this._scene.getSoundByName("gameSong").pause();
+            this._gameSong?.pause();
             this._pause.play(); //play pause music
         });
 
@@ -356,7 +358,7 @@ export class Hud {
             clearInterval(this._sparkhandle);
         }
         //--SOUNDS--
-        this._sparkWarningSfx.stop(); // if you restart the sparkler while this was playing (it technically would never reach cellId==10, so you need to stop the sound)
+        this._sparkWarningSfx?.stop(); // if you restart the sparkler while this was playing (it technically would never reach cellId==10, so you need to stop the sound)
 
         //reset the sparkler (particle system and light)
         if (sparkler != null) {
@@ -371,16 +373,16 @@ export class Hud {
                     this._sparklerLife.cellId++;
                 }
                 if (this._sparklerLife.cellId == 9) {
-                    this._sparkWarningSfx.play();
+                    this._sparkWarningSfx?.play();
                 }
                 if (this._sparklerLife.cellId == 10) {
                     this.stopSpark = true;
                     clearInterval(this._handle);
                     //sfx
-                    this._sparkWarningSfx.stop();
+                    this._sparkWarningSfx?.stop();
                 }
             } else { // if the game is paused, also pause the warning SFX
-                this._sparkWarningSfx.pause();
+                this._sparkWarningSfx?.pause();
             }
         }, 2000);
 
@@ -456,13 +458,13 @@ export class Hud {
             this._startTime = new Date().getTime();
 
             //--SOUNDS--
-            this._scene.getSoundByName("gameSong").play();
-            this._pause.stop();
+            this._gameSong?.resume();
+            this._pause?.stop();
 
-            if(this._sparkWarningSfx.isPaused) {
-                this._sparkWarningSfx.play();
+            if(this._sparkWarningSfx?.state === SoundState.Paused) {
+                this._sparkWarningSfx.resume();
             }
-            this._sfx.play(); //play transition sound
+            this._sfx?.play(); //play transition sound
         });
 
         const controlsBtn = Button.CreateSimpleButton("controls", "CONTROLS");
@@ -486,7 +488,7 @@ export class Hud {
             this._pauseMenu.isVisible = false;
 
             //play transition sound
-            this._sfx.play();
+            this._sfx?.play();
         });
 
         const quitBtn = Button.CreateSimpleButton("quit", "QUIT");
@@ -523,8 +525,8 @@ export class Hud {
             this.transition = true;
 
             //--SOUNDS--
-            this.quitSfx.play();
-            if(this._pause.isPlaying){
+            this.quitSfx?.play();
+            if(this._pause?.state === SoundState.Started){
                 this._pause.stop();
             }
         })
@@ -570,26 +572,17 @@ export class Hud {
             this._controls.isVisible = false;
 
             //play transition sound
-            this._sfx.play();
+            this._sfx?.play();
         });
     }
 
 
     //load all sounds needed for game ui interactions
-    private _loadSounds(scene: Scene): void {
-        this._pause = new Sound("pauseSong", "./sounds/Snowland.wav", scene, function () {
-        }, {
-            volume: 0.2
-        });
-
-        this._sfx = new Sound("selection", "./sounds/vgmenuselect.wav", scene, function () {
-        });
-
-        this.quitSfx = new Sound("quit", "./sounds/Retro Event UI 13.wav", scene, function () {
-        });
-
-        this._sparkWarningSfx = new Sound("sparkWarning", "./sounds/Retro Water Drop 01.wav", scene, function () {
-        }, {
+    private async _loadSounds(scene: Scene): Promise<void> {
+        this._pause = await CreateSoundAsync("pauseSong", "./sounds/Snowland.wav", { volume: 0.2 });
+        this._sfx = await CreateSoundAsync("selection", "./sounds/vgmenuselect.wav");
+        this.quitSfx = await CreateSoundAsync("quit", "./sounds/Retro Event UI 13.wav");
+        this._sparkWarningSfx = await CreateSoundAsync("sparkWarning", "./sounds/Retro Water Drop 01.wav", {
             loop: true,
             volume: 0.5,
             playbackRate: 0.6

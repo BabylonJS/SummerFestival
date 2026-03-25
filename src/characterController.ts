@@ -1,4 +1,4 @@
-import { Scene, Vector3, Ray, TransformNode, Mesh, Color3, Color4, UniversalCamera, Quaternion, AnimationGroup, ExecuteCodeAction, ActionManager, ParticleSystem, Texture, SphereParticleEmitter, Sound, Observable, ShadowGenerator } from "@babylonjs/core";
+import { Scene, Vector3, Ray, TransformNode, Mesh, Color3, Color4, UniversalCamera, Quaternion, AnimationGroup, ExecuteCodeAction, ActionManager, ParticleSystem, Texture, SphereParticleEmitter, Observable, ShadowGenerator, CreateSoundAsync, AbstractSound, SoundState } from "@babylonjs/core";
 import { PlayerInput } from "./inputController";
 
 export class Player extends TransformNode {
@@ -68,12 +68,12 @@ export class Player extends TransformNode {
     public _raisePlatform: boolean;
 
     //sfx
-    public lightSfx: Sound;
-    public sparkResetSfx: Sound;
-    private _resetSfx: Sound;
-    private _walkingSfx: Sound;
-    private _jumpingSfx: Sound;
-    private _dashingSfx: Sound;
+    public lightSfx: AbstractSound;
+    public sparkResetSfx: AbstractSound;
+    private _resetSfx: AbstractSound;
+    private _walkingSfx: AbstractSound;
+    private _jumpingSfx: AbstractSound;
+    private _dashingSfx: AbstractSound;
 
     //observables
     public onRun = new Observable();
@@ -140,10 +140,10 @@ export class Player extends TransformNode {
         //--SOUNDS--
         //observable for when to play the walking sfx
         this.onRun.add((play) => {
-            if (play && !this._walkingSfx.isPlaying) {
-                this._walkingSfx.play();
-            } else if (!play && this._walkingSfx.isPlaying) {
-                this._walkingSfx.stop();
+            if (play && this._walkingSfx?.state !== SoundState.Started) {
+                this._walkingSfx?.play();
+            } else if (!play && this._walkingSfx?.state === SoundState.Started) {
+                this._walkingSfx?.stop();
             }
         })
 
@@ -257,7 +257,7 @@ export class Player extends TransformNode {
         } else if (!this._isFalling && this._grounded) {
             this._currentAnim = this._idle;
             //only notify observer if it's playing
-            if(this.scene.getSoundByName("walking")?.isPlaying){
+            if(this._walkingSfx?.state === SoundState.Started){
                 this.onRun.notifyObservers(false);
             }
         } else if (this._isFalling) {
@@ -533,32 +533,22 @@ export class Player extends TransformNode {
         this.sparkler = particleSystem;
     }
 
-    private _loadSounds(scene: Scene): void {
+    private async _loadSounds(scene: Scene): Promise<void> {
 
-        this.lightSfx = new Sound("light", "./sounds/Rise03.mp3", scene, function () {
-        });
+        this.lightSfx = await CreateSoundAsync("light", "./sounds/Rise03.mp3");
 
-        this.sparkResetSfx = new Sound("sparkReset", "./sounds/Rise04.mp3", scene, function () {
-        });
+        this.sparkResetSfx = await CreateSoundAsync("sparkReset", "./sounds/Rise04.mp3");
 
-        this._jumpingSfx = new Sound("jumping", "./sounds/187024__lloydevans09__jump2.wav", scene, function () {
-        }, {
-            volume: 0.25
-        });
+        this._jumpingSfx = await CreateSoundAsync("jumping", "./sounds/187024__lloydevans09__jump2.wav", { volume: 0.25 });
 
-        this._dashingSfx = new Sound("dashing", "./sounds/194081__potentjello__woosh-noise-1.wav", scene, function () {
-        });
+        this._dashingSfx = await CreateSoundAsync("dashing", "./sounds/194081__potentjello__woosh-noise-1.wav");
 
-        this._walkingSfx = new Sound("walking", "./sounds/Concrete 2.wav", scene, function () {
-        }, {
+        this._walkingSfx = await CreateSoundAsync("walking", "./sounds/Concrete 2.wav", {
             loop: true,
             volume: 0.20,
             playbackRate: 0.6
         });
 
-        this._resetSfx = new Sound("reset", "./sounds/Retro Magic Protection 25.wav", scene, function () {
-        }, {
-            volume: 0.25
-        });
+        this._resetSfx = await CreateSoundAsync("reset", "./sounds/Retro Magic Protection 25.wav", { volume: 0.25 });
     }
 }
